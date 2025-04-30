@@ -38,8 +38,10 @@
 
 (defconst kdl-special-constants
   '("inf"
-    "nan")
-  "List of KDL keywords.")
+    "nan"
+    "true"
+    "false")
+  "List of KDL constants.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax highlighting
@@ -50,6 +52,8 @@
     (modify-syntax-entry ?\/ ". 124" syntax-table)
     (modify-syntax-entry ?* ". 23b" syntax-table)
     (modify-syntax-entry ?\n ">" syntax-table)
+    ;; Punctuation
+    (modify-syntax-entry ?= "." syntax-table)
     syntax-table)
   "Syntax table for `kdl-mode'.")
 
@@ -73,12 +77,13 @@
 Highlight the 1st result."
   (kdl--match-regexp
    (concat
-    "[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*.*{")
+    (rx symbol-start) "\\([a-zA-Z0-9_-]+\\)" (rx symbol-end)
+    "[[:space:]]*[^=]")
    limit))
 
 (defconst kdl-font-locks
   (list
-   `(,kdl-special-constants-regexp . font-lock-keyword-face)
+   `(,kdl-special-constants-regexp . font-lock-constant-face)
    '(kdl--match-node-name (1 font-lock-function-name-face)))
   "Font lock keywords of `kdl-mode'.")
 
