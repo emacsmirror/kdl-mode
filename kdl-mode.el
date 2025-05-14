@@ -1,6 +1,6 @@
 ;;; kdl-mode.el --- Major mode for editing KDL files.
 
-;; Copyright © 2022, by Ta Quang Trung
+;; Copyright © 2025, by Ta Quang Trung
 
 ;; Author: Ta Quang Trung
 ;; Version: 0.0.1
@@ -26,7 +26,8 @@
 ;; Emacs major mode for editing KDL files (https://kdl.dev/).
 
 ;; Features:
-;; - Syntax highlight for KDL intermediate code.
+;; - Syntax highlighting
+;; - Automatic code indentation
 
 ;; Installation:
 ;; - Automatic package installation from Melpa.
@@ -135,7 +136,7 @@ Highlight the 1st result."
 ;;;###autoload
 (define-derived-mode kdl-mode prog-mode
   "kdl-mode"
-  "Major mode for editing Ethereum KDL intermediate code."
+  "Major mode for editing KDL document language."
   :syntax-table kdl-syntax-table
 
   ;; Syntax highlighting
