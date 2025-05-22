@@ -6,6 +6,7 @@
 ;; Version: 0.0.1
 ;; Created: 27 April, 2025
 ;; Keywords: languages
+;; Package-Requires: ((emacs "24.3"))
 ;; Homepage: https://github.com/taquangtrung/emacs-kdl-mode
 
 ;; This program is free software; you can redistribute it and/or modify
