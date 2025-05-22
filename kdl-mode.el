@@ -66,27 +66,31 @@
    (rx symbol-end))
   "Regular expression to match special KDL constant.")
 
-(defun kdl--match-regexp (re limit)
-  "Generic regular expression matching wrapper for RE with a given LIMIT."
-  (re-search-forward re
-                     limit ; search bound
-                     t     ; no error, return nil
-                     nil   ; do not repeat
-                     ))
+(defun kdl-match-regexp (re bound)
+  "Generic regular expression matching wrapper for RE with a given BOUND."
+  (re-search-forward re bound t nil))
 
-(defun kdl--match-node-name (limit)
-  "Search the buffer forward until LIMIT matching node names.
-Highlight the 1st result."
-  (kdl--match-regexp
+(defun kdl-match-node-name (bound)
+  "Search the buffer forward until BOUND to match node names."
+  (kdl-match-regexp
    (concat
     (rx symbol-start) "\\([a-zA-Z0-9_-]+\\)" (rx symbol-end)
     "[[:space:]]*[^=]")
-   limit))
+   bound))
+
+(defun kdl-match-property-name (bound)
+  "Search the buffer forward until BOUND to match property names."
+  (kdl-match-regexp
+   (concat
+    (rx symbol-start) "\\([a-zA-Z0-9_-]+\\)" (rx symbol-end)
+    "[[:space:]]*=")
+   bound))
 
 (defconst kdl-font-locks
   (list
    `(,kdl-special-constants-regexp . font-lock-constant-face)
-   '(kdl--match-node-name (1 font-lock-function-name-face)))
+   '(kdl-match-node-name (1 font-lock-function-name-face))
+   '(kdl-match-property-name (1 font-lock-variable-name-face)))
   "Font lock keywords of `kdl-mode'.")
 
 ;;;;;;;;;;;;;;;;;;
