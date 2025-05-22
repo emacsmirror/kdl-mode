@@ -1,4 +1,4 @@
-;;; kdl-mode.el --- Major mode for editing KDL files.
+;;; kdl-mode.el --- Major mode for editing KDL files -*- lexical-binding: t -*-
 
 ;; Copyright © 2025, by Ta Quang Trung
 
@@ -115,7 +115,6 @@ Highlight the 1st result."
       (back-to-indentation)
       (let* ((ppss (syntax-ppss))
              (depth (car ppss))
-             (paren-start-pos (cadr ppss))
              (base (* tab-width depth)))
         (unless (= depth 0)
           (setq indent base)
@@ -125,7 +124,7 @@ Highlight the 1st result."
                 ((looking-at "\s*:=")
                  ;; indent for multiple-line assignment
                  (setq indent (+ base (* 2 tab-width))))
-                ((looking-back "\s*:=\s*\n\s*")
+                ((looking-back "\s*:=\s*\n\s*" nil nil)
                  ;; indent for multiple-line assignment
                  (setq indent (+ base (* 2 tab-width))))))))
     indent))
