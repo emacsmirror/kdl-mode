@@ -4,7 +4,7 @@ Emacs major mode for editing the [KDL document language](https://kdl.dev/).
 
 ## Screenshot
 
-TODO
+![kdl-mode](screenshots/kdl-mode.png)
 
 ## Installation
 
