@@ -1,22 +1,28 @@
-# kdl-mode
+kdl-mode
+========
 
 Emacs major mode for editing the [KDL document language](https://kdl.dev/).
 
-## Screenshot
+# Screenshot
 
 ![kdl-mode](screenshots/kdl-mode.png)
 
-## Installation
+# Installation
 
 - Automatic package installation from [Melpa](https://melpa.org/).
 
-## Features
+# Features
 
-### Supported
+- Syntax highlighting using regular expression
 
-- Syntax highlighting.
+- Syntax highlighting using Tree-Sitter (support Slashdash comment style)
+
 - Automatic code indentation.
 
-### Todo
+# Troubleshooting
 
-- [ ] Code outline via Imenu
+- If `tree-sitter-kdl` isn't installed automatically when open a KDL file, run `M-x kdl-install-tree-sitter-grammar` to ensure it is installed.
+
+# Acknowledgement
+
+- Syntax highlighting using [tree-sitter-kdl](https://github.com/tree-sitter-grammars/tree-sitter-kdl) was adopted from [kdl-ts-mode](https://github.com/dataphract/kdl-ts-mode/):

@@ -6,7 +6,7 @@
 ;; Version: 0.0.1
 ;; Created: 27 April, 2025
 ;; Keywords: languages
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "29.1"))
 ;; Homepage: https://github.com/taquangtrung/emacs-kdl-mode
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -34,9 +34,16 @@
 ;; - Automatic package installation from Melpa.
 ;; - Manual installation by putting the `kdl-mode.el' file in Emacs' load path.
 
+;; Acknowledgement:
+;; - Syntax highlighting using tree-sitter was adopted from:
+;;   https://github.com/dataphract/kdl-ts-mode/
+
 ;;; Code:
 
 (require 'rx)
+(require 'treesit)
+
+(declare-function treesit-parser-create "treesit.c")
 
 (defconst kdl-special-constants
   '("inf"
@@ -45,12 +52,12 @@
     "false")
   "List of KDL constants.")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Syntax highlighting
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Syntax table
 
 (defvar kdl-syntax-table
   (let ((syntax-table (make-syntax-table)))
-    ;; C++ style comment "// ..."
+    ;; C++ style comment "// ..." and "/* ... */"
     (modify-syntax-entry ?\/ ". 124" syntax-table)
     (modify-syntax-entry ?* ". 23b" syntax-table)
     (modify-syntax-entry ?\n ">" syntax-table)
@@ -58,6 +65,9 @@
     (modify-syntax-entry ?= "." syntax-table)
     syntax-table)
   "Syntax table for `kdl-mode'.")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Syntax highlighting using regular expression
 
 (defvar kdl-special-constants-regexp
   (concat
@@ -93,14 +103,77 @@
    '(kdl-match-property-name (1 font-lock-variable-name-face)))
   "Font lock keywords of `kdl-mode'.")
 
-;;;;;;;;;;;;;;;;;;
-;;; Indentation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Syntax highlighting using tree-sitter
+;;
+;; Adopted from: https://github.com/dataphract/kdl-ts-mode/
+
+(defvar kdl-treesit-font-locks
+  (treesit-font-lock-rules
+   :language 'kdl
+   :feature 'bracket
+   '((["(" ")" "{" "}"]) @font-lock-bracket-face)
+
+   :language 'kdl
+   :feature 'comment
+   '((single_line_comment) @font-lock-comment-face
+     (multi_line_comment) @font-lock-comment-face)
+
+   :language 'kdl
+   :feature 'constant
+   '("null" @font-lock-constant-face
+     (boolean) @font-lock-constant-face)
+
+   :language 'kdl
+   :feature 'number
+   '((number) @font-lock-number-face)
+
+   :language 'kdl
+   :feature 'type
+   '((type) @font-lock-type-face)
+
+   :language 'kdl
+   :feature 'string
+   :override t
+   '((string) @font-lock-string-face)
+
+   :language 'kdl
+   :feature 'escape-sequence
+   :override t
+   '((escape) @font-lock-escape-face)
+
+   :language 'kdl
+   :feature 'node
+   :override t
+   '((node (identifier) @font-lock-function-call-face))
+
+   :language 'kdl
+   :feature 'property
+   :override t
+   '((prop (identifier) @font-lock-property-use-face))
+
+   :language 'kdl
+   :feature 'error
+   :override t
+   '((ERROR) @font-lock-warning-face)
+
+   :language 'kdl
+   :feature 'comment
+   :override t
+   '((node (node_comment)) @font-lock-comment-face
+     (node (node_field (node_field_comment)) @font-lock-comment-face)
+     (node_children (node_children_comment)) @font-lock-comment-face))
+
+  "Tree-sitter font-lock settings for `kdl-mode'.")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Indentation
 
 (defun kdl-indent-line (&optional indent)
   "Indent the current line according to the KDL syntax, or supply INDENT."
   (interactive "P")
   (let ((pos (- (point-max) (point)))
-        (indent (or indent (kdl--calculate-indentation)))
+        (indent (or indent (kdl-calculate-indentation)))
         (shift-amount nil)
         (beg (line-beginning-position)))
     (skip-chars-forward " \t")
@@ -113,7 +186,7 @@
       (when (> (- (point-max) pos) (point))
         (goto-char (- (point-max) pos))))))
 
-(defun kdl--calculate-indentation ()
+(defun kdl-calculate-indentation ()
   "Calculate the indentation of the current line."
   (let (indent)
     (save-excursion
@@ -134,7 +207,19 @@
                  (setq indent (+ base (* 2 tab-width))))))))
     indent))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Public functions
+
+(defun kdl-install-tree-sitter-grammar ()
+  "Install tree-sitter-kdl grammar."
+  (interactive)
+  (unless (assoc 'kdl treesit-language-source-alist)
+    (add-to-list 'treesit-language-source-alist
+                 '(kdl . ("https://github.com/tree-sitter-grammars/tree-sitter-kdl"
+                          "master" "src"))))
+  (treesit-install-language-grammar 'kdl))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Major mode settings
 
 ;;;###autoload
@@ -143,8 +228,24 @@
   "Major mode for editing KDL document language."
   :syntax-table kdl-syntax-table
 
-  ;; Syntax highlighting
+  ;; Syntax highlighting using regex
   (setq font-lock-defaults '(kdl-font-locks))
+
+  ;; Install tree-sitter grammar if not already installed
+  (unless (treesit-ready-p 'kdl)
+    (message "kdl-mode: tree-sitter-kdl is not available. Start installing it...")
+    (kdl-install-tree-sitter-grammar))
+
+  ;; Syntax highlighting using tree-sitter
+  (when (treesit-ready-p 'kdl)
+    (treesit-parser-create 'kdl)
+    (setq-local treesit-font-lock-settings kdl-treesit-font-locks)
+    (setq-local treesit-font-lock-feature-list
+                '((comment)
+                  (string type)
+                  (constant escape-sequence number node property)
+                  (bracket error)))
+    (treesit-major-mode-setup))
 
   ;; Indentation
   (setq-local indent-tabs-mode nil)
