@@ -175,7 +175,7 @@
   (let ((pos (- (point-max) (point)))
         (indent (or indent (kdl-calculate-indentation)))
         (shift-amount nil)
-        (beg (line-beginning-position)))
+        (beg (progn (beginning-of-line) (point))))
     (skip-chars-forward " \t")
     (if (null indent)
         (goto-char (- (point-max) pos))
