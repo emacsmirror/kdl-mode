@@ -1,11 +1,12 @@
-kdl-mode
-========
+<div align="center">
 
-Emacs major mode for editing the [KDL document language](https://kdl.dev/).
+# kdl-mode
 
-# Screenshot
+Emacs major mode for editing files in the [KDL document language](https://kdl.dev/).
 
-![kdl-mode](screenshots/kdl-mode.png)
+</div>
+
+---
 
 # Installation
 
@@ -15,13 +16,17 @@ Emacs major mode for editing the [KDL document language](https://kdl.dev/).
 
 - Syntax highlighting using regular expression
 
-- Syntax highlighting using Tree-Sitter (support Slashdash comment style)
+- Syntax highlighting using Tree-Sitter (support Slashdash `/-` comment style )
 
 - Automatic code indentation.
 
+# Screenshot
+
+![kdl-mode](screenshots/kdl-mode.png)
+
 # Troubleshooting
 
-- If `tree-sitter-kdl` isn't installed automatically when open a KDL file, run `M-x kdl-install-tree-sitter-grammar` to ensure it is installed.
+- If `tree-sitter-kdl` isn't installed automatically when open a KDL file, you may need to run `M-x kdl-install-tree-sitter-grammar` to manually install `tree-sitter-kdl`.
 
 # Acknowledgement
 
