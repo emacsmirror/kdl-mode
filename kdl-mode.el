@@ -45,12 +45,22 @@
 
 (declare-function treesit-parser-create "treesit.c")
 
-(defconst kdl-special-constants
-  '("inf"
-    "nan"
-    "true"
-    "false")
-  "List of KDL constants.")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; User options
+
+(defgroup kdl-mode nil
+  "Support for editing KDL configuration files."
+  :link '(url-link "https://kdl.dev/")
+  :group 'languages
+  :prefix "kdl-")
+
+(defcustom kdl-indent-level nil
+  "Amount of indentation per nesting level within a KDL expression."
+  :group 'kdl-mode
+  :local t
+  :type '(choice (natnum :tag "Number of spaces" :value 4)
+                 (const :tag "Use `tab-width'" nil))
+  :safe (lambda (v) (or (natnump v) (null v))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax table
@@ -68,6 +78,13 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax highlighting using regular expression
+
+(defconst kdl-special-constants
+  '("inf"
+    "nan"
+    "true"
+    "false")
+  "List of KDL constants.")
 
 (defvar kdl-special-constants-regexp
   (concat
@@ -188,24 +205,21 @@
 
 (defun kdl-calculate-indentation ()
   "Calculate the indentation of the current line."
-  (let (indent)
-    (save-excursion
-      (back-to-indentation)
-      (let* ((ppss (syntax-ppss))
-             (depth (car ppss))
-             (base (* tab-width depth)))
-        (unless (= depth 0)
-          (setq indent base)
-          (cond ((looking-at "\s*[})]")
-                 ;; closing a block or a parentheses pair
-                 (setq indent (- base tab-width)))
-                ((looking-at "\s*:=")
-                 ;; indent for multiple-line assignment
-                 (setq indent (+ base (* 2 tab-width))))
-                ((looking-back "\s*:=\s*\n\s*" nil nil)
-                 ;; indent for multiple-line assignment
-                 (setq indent (+ base (* 2 tab-width))))))))
-    indent))
+  (save-excursion
+    (back-to-indentation)
+    (let* ((ppss (syntax-ppss))
+           (depth (car ppss))
+           (step (max 0 (or kdl-indent-level tab-width)))
+           (base (* step depth)))
+      (cond
+       ((= depth 0) nil)
+       ((looking-at (rx (* space) (char ?\} ?\))))
+        ;; closing a block or a parentheses pair
+        (- base step))
+       ((looking-back (rx space "\\\n" (* space)) nil nil)
+        ;; continued line
+        (+ base step))
+       (t base)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public functions
