@@ -205,28 +205,21 @@
 
 (defun kdl-calculate-indentation ()
   "Calculate the indentation of the current line."
-  (let (indent)
-    (save-excursion
-      (back-to-indentation)
-      (let* ((ppss (syntax-ppss))
-             (depth (car ppss))
-             (step (max 0 (or kdl-indent-level tab-width)))
-             (base (* step depth)))
-        (unless (= depth 0)
-          (setq indent base)
-          (cond ((looking-at "\s*[})]")
-                 ;; closing a block or a parentheses pair
-                 (setq indent (- base step)))
-                ((looking-at "\s*:=")
-                 ;; indent for multiple-line assignment
-                 (setq indent (+ base (* 2 step))))
-                ((looking-back "\s*:=\s*\n\s*" nil nil)
-                 ;; indent for multiple-line assignment
-                 (setq indent (+ base (* 2 step))))
-                ((looking-back "\s*\\\\\n\s*" nil nil)
-                 ;; indent for line continuation
-                 (setq indent (+ base step)))))))
-    indent))
+  (save-excursion
+    (back-to-indentation)
+    (let* ((ppss (syntax-ppss))
+           (depth (car ppss))
+           (step (max 0 (or kdl-indent-level tab-width)))
+           (base (* step depth)))
+      (cond
+       ((= depth 0) nil)
+       ((looking-at (rx (* space) (char ?\} ?\))))
+        ;; closing a block or a parentheses pair
+        (- base step))
+       ((looking-back (rx space "\\\n" (* space)) nil nil)
+        ;; continued line
+        (+ base step))
+       (t base)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public functions
