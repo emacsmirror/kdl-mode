@@ -60,7 +60,7 @@
   :local t
   :type '(choice (natnum :tag "Number of spaces" :value 4)
                  (const :tag "Use `tab-width'" nil))
-  :safe 'natnump)
+  :safe (lambda (v) (or (natnump v) (null v))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax table
