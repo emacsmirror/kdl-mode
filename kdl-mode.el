@@ -59,8 +59,20 @@
   :group 'kdl-mode
   :local t
   :type '(choice (natnum :tag "Number of spaces" :value 4)
-                 (const :tag "Use `tab-width'" nil))
-  :safe (lambda (v) (or (natnump v) (null v))))
+                 (const :tag "Use `tab-width'" nil)))
+
+;; kdl-natnum-or-nil-p needs to be autoloaded, so it can't be embedded
+;; in the defcustom above, and it needs to have a name and a docstring
+;; so that ‘C-h v kdl-indent-level’ provides a useful explanation for
+;; what values are safe.
+
+;;;###autoload
+(defun kdl-natnum-or-nil-p (v)
+  "Return t if V is either a nonnegative integer, or nil."
+  (or (natnump v) (null v)))
+
+;;;###autoload
+(put 'kdl-indent-level 'safe-local-variable 'kdl-natnum-or-nil-p)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax table
