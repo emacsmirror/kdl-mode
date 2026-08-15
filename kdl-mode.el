@@ -222,7 +222,10 @@
                  (setq indent (+ base (* 2 step))))
                 ((looking-back "\s*:=\s*\n\s*" nil nil)
                  ;; indent for multiple-line assignment
-                 (setq indent (+ base (* 2 step))))))))
+                 (setq indent (+ base (* 2 step))))
+                ((looking-back "\s*\\\\\n\s*" nil nil)
+                 ;; indent for line continuation
+                 (setq indent (+ base step)))))))
     indent))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
