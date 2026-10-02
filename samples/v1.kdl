@@ -1,0 +1,51 @@
+// KDL v1 sample: covers every highlighting rule of kdl-mode.
+
+/* A multi-line
+   comment */
+title "Hello, World"
+
+// Node with arguments, properties, and type annotations
+package (pkg)"kdl-mode" version="1.0.0" {
+    authors "Alice" "Bob"
+    license "MIT"
+    enabled true
+    deprecated false
+    homepage null
+    (url)repository "https://example.com/kdl-mode"
+}
+
+// Numbers
+numbers 1 -2 3.14 1.5e10 0xdeadbeef 0o755 0b1010 1_000_000
+
+// Strings, escapes, and raw strings
+strings "plain" "tab\there" "quote \" inside" "unicode \u{1F600}"
+raw r"C:\path\no\escapes" r#"has "quotes" inside"#
+
+// Slashdash comments
+/-disabled-node "ignored" {
+    child 1
+}
+node /-"skipped-arg" "kept" /-skipped=1 kept=2
+parent {
+    /-hidden {
+        nested 1
+    }
+    visible 1
+}
+
+// Nested children and indentation
+server {
+    listen "0.0.0.0" port=8080
+    tls {
+        cert "/etc/ssl/cert.pem"
+        key "/etc/ssl/key.pem"
+    }
+}
+
+// Semicolon separated nodes
+a 1; b 2; c 3
+
+// Line continuation
+long-node 1 \
+    2 \
+    3

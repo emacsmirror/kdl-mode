@@ -1,0 +1,37 @@
+// Edge cases for indentation and comments (valid in both KDL v1 and v2).
+
+// Empty and nested children
+empty {}
+deep {
+    a {
+        b {
+            c {
+                d 1
+            }
+        }
+    }
+}
+
+// Comment markers inside strings are not comments
+urls "http://example.com" "/* not a comment */"
+
+// Slashdash on a property, an argument, and a children block
+node /-1 /-key="v" /-{
+    hidden 1
+}
+node2 1 2 /-3 {
+    visible 1
+}
+
+// Mixed comments on one line
+x 1 // trailing comment
+y 2 /* inline */ z=3
+
+// Closing brace and next node on one line
+group { one 1; two 2 }
+after 1
+
+/* Unterminated nesting guard:
+   /* nested */
+   still a comment */
+end 1
